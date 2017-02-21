@@ -8,10 +8,11 @@ class AddActivity extends Component {
   }
   render () {
     return (
-      <div >
-
-        <button onClick={() => this.pushToChooseTodayActivities()}>Start new day</button>
-      </div>
+        <div className="outer">
+          <span className="inner">
+            <button className="btn btn-secondary btn-lg" onClick={() => this.pushToChooseTodayActivities()}>Start new day</button>
+          </span>
+        </div>
     );
   }
 }

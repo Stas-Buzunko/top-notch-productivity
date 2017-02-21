@@ -8,20 +8,22 @@ class ChooseTodayActivities extends Component {
   }
   render () {
     return (
-      <div >
-        <p4>Choose activities for today</p4>
+      <div className="outer">
+        <span className="inner">
+          <h3 className="block"> Choose activities for today</h3>
 
-        <div className="row">
-  <div className="col-lg-6">
-    <div className="input-group">
-      <span className="input-group-addon">
-        <input type="checkbox" aria-label="Checkbox for following text input"/>
-      </span>
-      <input type="text" class="form-control" aria-label="Text input with checkbox"/>
-    </div>
-  </div>
-    </div>
-        <button onClick={() => this.pushToPayment()}>Lets go</button>
+          <div className="row block">
+            <div className="col-lg-6">
+              <div className="input-group">
+                <span className="input-group-addon">
+                  <input type="checkbox" aria-label="Checkbox for following text input"/>
+                </span>
+                <input type="text" className="form-control" aria-label="Text input with checkbox"/>
+              </div>
+            </div>
+          </div>
+          <button type="button block" className="btn btn-secondary btn-lg" onClick={() => this.pushToPayment()}>Lets go</button>
+        </span>
       </div>
     );
   }

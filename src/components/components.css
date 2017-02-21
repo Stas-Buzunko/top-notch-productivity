@@ -1,5 +1,28 @@
 
-DIV.container {
-    min-height: 10em;
-    display: table-cell;
-    vertical-align: middle }
+.outer:before {
+  content: '';
+  display: inline-block;
+  vertical-align: middle;
+  height:300px;
+  width: 100%;
+}
+
+.inner {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.outer {
+  text-align: center;
+}
+.block {
+  margin: 20px;
+
+}
+.span {
+   display: block;
+}
+
+ol.noMarker {
+  list-style-type: none;
+}
