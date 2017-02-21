@@ -16,7 +16,7 @@ console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scop
   }
   render () {
     return (
-      <div className="outer">
+      <div className="outer"  style={{ height:'300px'}}>
         <span className="inner">
           <div className="g-signin2" data-onsuccess="onSignIn" onClick={() => this.pushToActivity()}></div>
         </span>

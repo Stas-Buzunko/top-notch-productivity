@@ -11,7 +11,7 @@ class AddActivity extends Component {
       <div className="outer">
         <span className="inner">
           <h3 className="block"> Add activity and its price</h3>
-          <table className="table block">
+          <table className="table">
             <thead>
               <tr>
                 <th>Activities</th>
@@ -33,11 +33,14 @@ class AddActivity extends Component {
                 </tr>
             </tbody>
           </table>
-
-          <button type="button block"  style={{ margin: '10px'}}  className="btn btn-secondary btn-lg" onClick={() => this.pushToStartNewDay()}>   +   </button>
-<br/>
-           <button type="button block"  style={{ margin: '10px'}}  className="btn btn-secondary btn-lg" onClick={() => this.pushToStartNewDay()}>  Next  </button>
-
+          <ol className="noMarker" >
+            <li className="block">
+              <button type="button block" className="btn btn-secondary btn-lg" onClick={() => this.pushToStartNewDay()}>   +   </button>
+            </li>
+            <li className="block">
+              <button type="button block" className="btn btn-secondary btn-lg" onClick={() => this.pushToStartNewDay()}>  Next  </button>
+            </li>
+          </ol>
         </span>
       </div>
     );
