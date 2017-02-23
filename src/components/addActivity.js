@@ -66,7 +66,7 @@ class AddActivity extends Component {
                     <div className="modal-content">
                       <div className="modal-header">
                         <h5 className="modal-title" id="exampleModalLabel">New activity</h5>
-                        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" className="close" data-dismiss="modal"  onClick={() => this.setState({price: '', name: ''})} aria-label="Close">
                           <span aria-hidden="true">&times;</span>
                         </button>
                       </div>
@@ -74,11 +74,11 @@ class AddActivity extends Component {
                         <form>
                           <div className="form-group">
                             <label htmlFor="recipient-name" className="form-control-label">Activity:</label>
-                            <input className="date-input" onChange={e => this.setState({name: e.target.value})} />
+                            <input className="date-input" value={this.state.name} onChange={e => this.setState({name: e.target.value})} />
                           </div>
                           <div className="form-group">
                             <label htmlFor="message-text" className="form-control-label">Price:</label>
-                            <input className="date-input" onChange={e => this.setState({price: e.target.value})} />
+                            <input className="date-input" value={this.state.price} onChange={e => this.setState({price: e.target.value})} />
                           </div>
                         </form>
                       </div>

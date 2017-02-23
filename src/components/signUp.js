@@ -11,7 +11,7 @@ class SignUp extends Component {
     return (
       <div className="outer"  style={{ height:'300px'}}>
         <span className="inner">
-          <button onClick={this.props.signUpWithGoogle}>Google</button>
+          <button onClick={this.props.signUpWithGoogle} onClick={this.pushToActivity()}>Google</button>
         </span>
       </div>
     );
