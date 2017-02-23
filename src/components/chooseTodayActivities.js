@@ -10,20 +10,26 @@ class ChooseTodayActivities extends Component {
       activities: [
         {id : 1,
         name: 'ggggg',
-        price: 'rrrr',},
+        price: 'rrrr',
+        choosen: false,},
         {id : 2,
         name: 'tttttt',
-        price: 'rrrrr',},
+        price: 'rrrrr',
+        choosen: true,},
       ],
-      name: '',
-      price: '',
+    isChecked: false,
     }
   };
 
   pushToPayment() {
     browserHistory.push('payment')
-  }
+  };
+
   render () {
+    this.state.activities.map((item, i) => {
+    console.log(item)
+  });
+    console.log(this.state.name);
     return (
       <div className="outer">
         <span className="inner">
@@ -34,9 +40,14 @@ class ChooseTodayActivities extends Component {
                 return (
                   <div key={i} className="input-group">
                     <span className="input-group-addon" >
-                      <input type="checkbox" aria-label="Checkbox for following text input"/>
+                      <input
+                        type="checkbox"
+                        aria-label="Checkbox for following text input"
+                        checked={item.choosen}
+                        onChange={e => this.setState({isChecked: e.target.checked})}
+                    />
                     </span>
-                    <input type="text" className="form-control" aria-label="Text input with checkbox"/>
+                    <input type="text" className="form-control" placeholder={item.name} aria-label="Text input with checkbox"/>
                   </div>
                 )}
               )}
