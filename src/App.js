@@ -36,27 +36,30 @@ class App extends Component {
 
   signUpWithGoogle() {
     const { authenticated } = this.state
-    if (!authenticated) {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-      .then(() => {
-        toastr.success('You are in!')
-      })
-      .catch(error => {
-        toastr.error(error.message)
-      });
-    }
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    // check if new account
+    // if yes redirect to add activities
+    // otherwise no redirect
+    firebase.auth().signInWithPopup(provider)
+    .then(() => {
+      toastr.success('You are in!')
+    })
+    .catch(error => {
+      toastr.error(error.message)
+    });
   }
 
   render() {
     const { authenticated } = this.state;
-    console.log(authenticated)
-    return (
-    
-        <div className="routerView">
-        {!authenticated && <SignUp signUpWithGoogle={this.signUpWithGoogle} />}
-        {this.props.children}
 
+    if (!authenticated) {
+      return (<SignUp signUpWithGoogle={this.signUpWithGoogle} />)
+    }
+
+    return (
+        <div className="routerView">
+        {this.props.children}
       </div>
     );
   }

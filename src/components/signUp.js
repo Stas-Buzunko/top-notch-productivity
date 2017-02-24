@@ -3,15 +3,11 @@ import { browserHistory } from 'react-router';
 import './components.css';
 
 class SignUp extends Component {
-  pushToActivity() {
-    browserHistory.push({pathname: '/addActivity'})
-  }
-
   render () {
     return (
       <div className="outer"  style={{ height:'300px'}}>
         <span className="inner">
-          <button onClick={this.props.signUpWithGoogle} onClick={this.pushToActivity()}>Google</button>
+          <button onClick={this.props.signUpWithGoogle} >Google</button>
         </span>
       </div>
     );
