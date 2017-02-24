@@ -19,7 +19,8 @@ class Payment extends Component {
   }
 
   render () {
-    const { cardNumber,cardholdersName,expiryDate,cvc} = this.state;
+    const { cardNumber, cardholdersName, expiryDate, cvc} = this.state;
+
     return (
       <div className="outer">
         <span className="inner">

@@ -17,7 +17,7 @@ class ChooseTodayActivities extends Component {
         price: 'rrrrr',
         choosen: true,},
       ],
-    isChecked: false,
+      isChecked: false,
     }
   };
 
@@ -26,10 +26,6 @@ class ChooseTodayActivities extends Component {
   };
 
   render () {
-    this.state.activities.map((item, i) => {
-    console.log(item)
-  });
-    console.log(this.state.name);
     return (
       <div className="outer">
         <span className="inner">

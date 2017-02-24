@@ -6,6 +6,7 @@ class AddActivity extends Component {
   pushToChooseTodayActivities() {
     browserHistory.push('chooseTodayActivities')
   }
+
   render () {
     return (
         <div className="outer">

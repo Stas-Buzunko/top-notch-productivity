@@ -35,6 +35,7 @@ class AddActivity extends Component {
       price: '',
     });
   }
+
   render () {
     return (
       <div className="container">
