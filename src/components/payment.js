@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {  browserHistory, Link } from 'react-router';
+import {  browserHistory } from 'react-router';
 import './components.css';
 
 class Payment extends Component {
@@ -19,7 +19,8 @@ class Payment extends Component {
   }
 
   render () {
-    const { cardNumber,cardholdersName,expiryDate,cvc} = this.state;
+    const { cardNumber, cardholdersName, expiryDate, cvc} = this.state;
+
     return (
       <div className="outer">
         <span className="inner">

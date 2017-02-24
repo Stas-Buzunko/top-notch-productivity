@@ -1,20 +1,23 @@
 import React, { Component } from 'react';
-import {  browserHistory, Link } from 'react-router';
+import { browserHistory } from 'react-router';
 import './components.css';
 
 class TodayActivities extends Component {
   constructor(props) {
    super(props);
 
-   this.state = {
-     activity: '',
-   };
-};
+    this.state = {
+      activity: '',
+    };
+  };
+
   pushToChooseTodayActivities() {
     browserHistory.push('chooseTodayActivities')
   }
+
   render () {
     const {activity } = this.state;
+
     return (
       <div className="outer">
         <span className="inner">
