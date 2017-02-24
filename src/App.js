@@ -1,19 +1,21 @@
 import React, { Component } from 'react';
 import firebase from 'firebase'
-import SignUp from './components/signUp'
+import SignUp from './components/SignUp'
 import toastr from 'toastr'
+import { browserHistory } from 'react-router'
 import 'toastr/build/toastr.min.css'
 import './App.css';
 
 class App extends Component {
   constructor(props) {
     super(props)
-    const authenticatedFromStorage = localStorage.getItem('top-notch-productivity')
-    const authenticated = authenticatedFromStorage !== null
+    const userFromStorage = localStorage.getItem('top-notch-productivity')
+    const isUser = userFromStorage !== null
+    const user = isUser ? JSON.parse(userFromStorage) : {}
 
     this.state = {
-      authenticated,
-      id: ''
+      authenticated: isUser,
+      user
     }
 
     this.signUpWithGoogle = this.signUpWithGoogle.bind(this)
@@ -23,12 +25,16 @@ class App extends Component {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         console.log('logged in');
-        this.setState({authenticated: true, id: user.uid});
-        localStorage.setItem('top-notch-productivity', 'true');
-      } 
-      else {
-        this.setState({authenticated: false, id: ''});
-        localStorage.removeItem('top-notch-productivity', 'true');
+        if (!user.activities || !user.activities.length) {
+          browserHistory.push('activites')          
+        }
+
+        this.setState({authenticated: true, user});
+     
+        localStorage.setItem('top-notch-productivity', JSON.stringify(user));
+      } else {
+        this.setState({authenticated: false, user: {}});
+        localStorage.removeItem('top-notch-productivity');
         console.log('not logged in');
       }
     });
@@ -38,11 +44,21 @@ class App extends Component {
     const { authenticated } = this.state
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // check if new account
-    // if yes redirect to add activities
-    // otherwise no redirect
     firebase.auth().signInWithPopup(provider)
-    .then(() => {
+    .then((result) => {
+      const { uid, displayName, email } = result.user;
+
+      firebase.database().ref('users/' + uid).once('value')
+      .then(snapshot => {
+        const userObject = snapshot.val();
+        if (!userObject) {
+          firebase.database().ref('users/' + uid).set({
+            displayName,
+            email
+          })
+        }
+      })
+
       toastr.success('You are in!')
     })
     .catch(error => {
@@ -59,6 +75,7 @@ class App extends Component {
 
     return (
         <div className="routerView">
+        <button onClick={() => firebase.auth().signOut()}> Sign out </button>
         {this.props.children}
       </div>
     );

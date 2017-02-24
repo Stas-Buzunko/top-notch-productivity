@@ -11,10 +11,6 @@ class TodayActivities extends Component {
     };
   };
 
-  pushToChooseTodayActivities() {
-    browserHistory.push('chooseTodayActivities')
-  }
-
   render () {
     const {activity } = this.state;
 
