@@ -25,13 +25,7 @@ class App extends Component {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         console.log('logged in');
-        if (!user.activities || !user.activities.length) {
-          browserHistory.push('activites')          
-        }
-
-        this.setState({authenticated: true, user});
-     
-        localStorage.setItem('top-notch-productivity', JSON.stringify(user));
+        this.fetchUser(user.uid)
       } else {
         this.setState({authenticated: false, user: {}});
         localStorage.removeItem('top-notch-productivity');
@@ -66,17 +60,42 @@ class App extends Component {
     });
   }
 
+  fetchUser(uid) {
+    firebase.database().ref('users/' + uid).on('value', snapshot => {
+      const user = snapshot.val()
+      if (user) {
+        this.setState({authenticated: true, user: {...user, uid: snapshot.key}});
+     
+        localStorage.setItem('top-notch-productivity', JSON.stringify(user));
+        if (!user.activities || !user.activities.length) {
+          browserHistory.push('activites')          
+        }
+      }
+    })
+  }
+
   render() {
-    const { authenticated } = this.state;
+    const { authenticated, user } = this.state;
 
     if (!authenticated) {
       return (<SignUp signUpWithGoogle={this.signUpWithGoogle} />)
     }
 
+    const { children } = this.props;
+    const childrenWithProps = React.Children.map(children,
+      child => React.cloneElement(child, {
+        user
+      })
+    );
+
     return (
-        <div className="routerView">
+      <div className="container">
         <button onClick={() => firebase.auth().signOut()}> Sign out </button>
-        {this.props.children}
+        <div className="outer">
+          <div className="inner">
+            {childrenWithProps}
+          </div>
+        </div>
       </div>
     );
   }

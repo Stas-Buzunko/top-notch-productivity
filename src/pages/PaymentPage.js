@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {  browserHistory } from 'react-router';
-import './components.css';
+import '../components/components.css';
 
 class Payment extends Component {
   constructor(props) {
