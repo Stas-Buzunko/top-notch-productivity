@@ -15,7 +15,9 @@ class App extends Component {
 
     this.state = {
       authenticated: isUser,
-      user
+      user,
+      day: '',
+      loading: true
     }
 
     this.signUpWithGoogle = this.signUpWithGoogle.bind(this)
@@ -26,6 +28,7 @@ class App extends Component {
       if (user) {
         console.log('logged in');
         this.fetchUser(user.uid)
+        this.fetchLastDay(user.uid)
       } else {
         this.setState({authenticated: false, user: {}});
         localStorage.removeItem('top-notch-productivity');
@@ -35,7 +38,6 @@ class App extends Component {
   }
 
   signUpWithGoogle() {
-    const { authenticated } = this.state
     const provider = new firebase.auth.GoogleAuthProvider();
 
     firebase.auth().signInWithPopup(provider)
@@ -74,26 +76,51 @@ class App extends Component {
     })
   }
 
+  fetchLastDay(uid) {
+    firebase.database().ref('days')
+    .orderByChild('userId')
+    .equalTo(uid)
+    .limitToLast(1)
+    .on('child_added', snapshot => {
+      const dayObject = snapshot.val();
+
+      if (dayObject && Number(dayObject.startedAt) + 24 * 60 * 60 * 1000 > Date.now()) {
+        firebase.database().ref('days/' + snapshot.key).on('value', snapshot2 => {
+          const day = {...snapshot2.val(), id: snapshot2.key };
+          this.setState({ day, loading: false })
+        })
+      } else {
+        this.setState({ loading: false})
+      }
+    })
+  }
+
   render() {
-    const { authenticated, user } = this.state;
+    const { authenticated, user, day, loading } = this.state;
+    let content;
 
     if (!authenticated) {
-      return (<SignUp signUpWithGoogle={this.signUpWithGoogle} />)
-    }
+      content = (<SignUp signUpWithGoogle={this.signUpWithGoogle} />)
+    } else if (loading) {
+      content = <i className="fa fa-refresh fa-spin fa-4x" aria-hidden="true" style={{color: 'blue'}}></i>
+    } else {
+      const { children } = this.props;
+      const childrenWithProps = React.Children.map(children,
+        child => React.cloneElement(child, {
+          user,
+          day
+        })
+      );
 
-    const { children } = this.props;
-    const childrenWithProps = React.Children.map(children,
-      child => React.cloneElement(child, {
-        user
-      })
-    );
+      content = childrenWithProps
+    }
 
     return (
       <div className="container">
-        <button onClick={() => firebase.auth().signOut()}> Sign out </button>
+        {authenticated && <button onClick={() => firebase.auth().signOut()}> Sign out </button>}
         <div className="outer">
           <div className="inner">
-            {childrenWithProps}
+            {content}
           </div>
         </div>
       </div>

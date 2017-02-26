@@ -12,9 +12,23 @@ class MainPage extends Component {
     }
   }
 
+  componentWillMount() {
+    const { day } = this.props;
+
+    if (day) {
+      this.setState({currentView: 'DayInProgress'})
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!this.props.day && nextProps.day) {
+      this.setState({currentView: 'DayInProgress'})
+    }
+  }
+
   render() {
     const { currentView } = this.state;
-    const { user } = this.props;
+    const { user, day } = this.props;
     let content;
 
     switch (currentView) {
@@ -22,7 +36,7 @@ class MainPage extends Component {
         content = <ActivityList user={user} />;
         break;
       case 'DayInProgress':
-        content = <TodayActivities />;
+        content = <TodayActivities day={day} />;
         break;
       default:
         content = <button

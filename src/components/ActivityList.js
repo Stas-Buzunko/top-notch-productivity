@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { Modal } from 'react-bootstrap'
 import ActivityItem from './ActivityItem';
-import firebase from 'firebase'
+import firebase from 'firebase';
+import { browserHistory } from 'react-router';
+
 import './components.css';
 
 class ActivityList extends Component {
@@ -103,7 +105,6 @@ class ActivityList extends Component {
   }
 
   updateActivities(newActivities) {
-    console.log(newActivities)
     const { user } = this.props;
     firebase.database().ref('users/' + user.uid + '/activities').set(newActivities)
 
@@ -113,6 +114,24 @@ class ActivityList extends Component {
       isModalShown: false,
       activityToEdit: ''
     });
+  }
+
+  startNewDay() {
+    const { chosenActivities } = this.state;
+    const { dayId, user } = this.props;
+    let newDay;
+
+    if (dayId) {
+      // update somehow
+    } else {
+      newDay = {
+        startedAt: Date.now(),
+        userId: user.uid,
+        activities: chosenActivities
+      }
+
+      firebase.database().ref('days').push(newDay)
+    }
   }
 
   render () {
@@ -152,6 +171,22 @@ class ActivityList extends Component {
           type="button block"
           className="btn btn-secondary btn-lg"
           onClick={() => this.setState({isModalShown: true})}>  +  </button>
+        }
+        {Boolean(activities.length) && !isChoosable &&
+          <button
+          type="button block"
+          className="btn btn-secondary btn-lg"
+          onClick={() => browserHistory.push('/')}
+          style={{display: 'block', margin: 'auto'}}
+          >  Return to main page  </button>
+        }
+        {Boolean(activities.length) && isChoosable &&
+          <button
+          type="button block"
+          className="btn btn-secondary btn-lg"
+          onClick={() => this.startNewDay()}
+          style={{display: 'block', margin: 'auto'}}
+          >  Just do it!  </button>
         }
         <Modal
           backdrop={true}
