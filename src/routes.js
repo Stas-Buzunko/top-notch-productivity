@@ -9,7 +9,7 @@ import MainPage from './pages/MainPage';
 export default (
   <Route path="/" component={App}>
     <IndexRoute component={MainPage} />
-    <Route path="activites" component={ActivitiesPage} />
+    <Route path="activities" component={ActivitiesPage} />
     <Route path="payment" component={Payment} />
   </Route>
 );

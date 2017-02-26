@@ -45,7 +45,7 @@ class MainPage extends Component {
             Start new productive day
         </button>
     }
-
+// in not payment => send to payment on start new day
     return (
       <div>{content}</div>
     )

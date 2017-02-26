@@ -15,18 +15,32 @@ class ActivityList extends Component {
       price: '',
       isModalShown: false,
       chosenActivities: [],
-      activityToEdit: ''
+      activityToEdit: '',
+      isAllChosen: false
     }
   };
 
-  chooseAll() {
+  componentWillReceiveProps(nextProps) {
+    const { activities = [] } = this.props.user;
     const { chosenActivities } = this.state;
+    const nextActivities = nextProps.user.activities || [];
+
+    if (activities !== nextActivities) {
+      const filtered = chosenActivities.filter(activity =>
+        nextActivities.some(nextActivity => activity.id === nextActivity.id)
+      )
+      this.setState({chosenActivities: filtered})
+    }
+  }
+
+  chooseAll() {
+    const { isAllChosen } = this.state;
     const { activities = [] } = this.props.user;
 
-    if (chosenActivities.length === activities.length) {
-      this.setState({chosenActivities: []})
+    if (isAllChosen) {
+      this.setState({chosenActivities: [], isAllChosen: !isAllChosen})
     } else {
-      this.setState({chosenActivities: activities})
+      this.setState({chosenActivities: activities, isAllChosen: !isAllChosen})
     }
   }
 
@@ -54,6 +68,7 @@ class ActivityList extends Component {
     const { name, price, activityToEdit } = this.state;
     const { activities = [] } = this.props.user;
     const activity = {
+      id: this.generateUUID(),
       name,
       price,
     };
@@ -64,7 +79,7 @@ class ActivityList extends Component {
 
       newActivities = [
         ...activities.slice(0, index),
-        activity,
+        {...activityToEdit, name, price },
         ...activities.slice(index + 1)
       ]
 
@@ -91,17 +106,8 @@ class ActivityList extends Component {
 
   deleteActivity(activity) {
     const { activities = [] } = this.props.user;
-
-    const index = activities.indexOf(activity);
-
-    if (index !== -1) {
-      const newActivities = [
-        ...activities.slice(0, index),
-        ...activities.slice(index + 1)
-      ];
-
-      this.updateActivities(newActivities);
-    }
+    const filtered = activities.filter(item => item.id !== activity.id);
+    this.updateActivities(filtered);
   }
 
   updateActivities(newActivities) {
@@ -134,8 +140,27 @@ class ActivityList extends Component {
     }
   }
 
+  isChosen(activity) {
+    const { chosenActivities } = this.state;
+    return chosenActivities.some(chosen =>
+      chosen.id === activity.id)
+  }
+
+  generateUUID(){
+    let d = Date.now();
+    if(window.performance && typeof window.performance.now === 'function'){
+        d += performance.now(); //use high-precision timer if available
+    }
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+  }
+
   render () {
-    const { isModalShown, chosenActivities } = this.state;
+    const { isModalShown, isAllChosen } = this.state;
     const { activities = [] } = this.props.user;
     const { isChoosable = true, isEditable = true, isDeletable = true, isAddable = true } = this.props;
 
@@ -145,7 +170,7 @@ class ActivityList extends Component {
         <table className="table">
           <thead>
             <tr>
-              {isChoosable && <td><input type='Checkbox' onChange={() => this.chooseAll()} /> Select all</td>}
+              {isChoosable && <td><input type='Checkbox' onChange={() => this.chooseAll()} checked={isAllChosen} /> Select all</td>}
               <th className="th-center">Activities</th>
               <th className="th-center">Price</th>
               {isEditable && <td>Edit</td>}
@@ -157,7 +182,7 @@ class ActivityList extends Component {
               <ActivityItem
                 activity={activity}
                 isChoosable={isChoosable}
-                isChosen={chosenActivities.indexOf(activity) !== -1}
+                isChosen={this.isChosen(activity)}
                 isEditable={isEditable}
                 isDeletable={isDeletable}
                 onDelete={() => this.deleteActivity(activity)}
@@ -202,11 +227,11 @@ class ActivityList extends Component {
           <Modal.Body>
             <form>
               <div className="form-group">
-                <label htmlFor="recipient-name" className="form-control-label">Activity:</label>
+                <label htmlFor="recipient-name" className="form-control-label">Activity:&nbsp;</label>
                 <input className="date-input" onChange={e => this.setState({name: e.target.value})} value={this.state.name} />
               </div>
               <div className="form-group">
-                <label htmlFor="message-text" className="form-control-label">Price:</label>
+                <label htmlFor="message-text" className="form-control-label">Price: $</label>
                 <input className="date-input" onChange={e => this.setState({price: e.target.value})} value={this.state.price} />
               </div>
             </form>

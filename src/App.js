@@ -64,13 +64,13 @@ class App extends Component {
 
   fetchUser(uid) {
     firebase.database().ref('users/' + uid).on('value', snapshot => {
-      const user = snapshot.val()
+      let user = snapshot.val()
       if (user) {
-        this.setState({authenticated: true, user: {...user, uid: snapshot.key}});
-     
+        user = { ...user, uid: snapshot.key }
+        this.setState({authenticated: true, user });
         localStorage.setItem('top-notch-productivity', JSON.stringify(user));
         if (!user.activities || !user.activities.length) {
-          browserHistory.push('activites')          
+          browserHistory.push('activities')          
         }
       }
     })
@@ -81,16 +81,21 @@ class App extends Component {
     .orderByChild('userId')
     .equalTo(uid)
     .limitToLast(1)
-    .on('child_added', snapshot => {
-      const dayObject = snapshot.val();
+    .on('value', snapshot => {
+      const dayQuery = snapshot.val();
+      if (dayQuery) {
+        const key = Object.keys(dayQuery)[0]
+        const dayObject = dayQuery[key]
 
-      if (dayObject && Number(dayObject.startedAt) + 24 * 60 * 60 * 1000 > Date.now()) {
-        firebase.database().ref('days/' + snapshot.key).on('value', snapshot2 => {
-          const day = {...snapshot2.val(), id: snapshot2.key };
-          this.setState({ day, loading: false })
-        })
-      } else {
-        this.setState({ loading: false})
+        if (dayObject && Number(dayObject.startedAt) + 24 * 60 * 60 * 1000 > Date.now()) {
+          const day = {...dayObject, id: key };
+          this.setState({ day, loading: false });
+        } else {
+          this.setState({loading: false})
+        }
+
+
+
       }
     })
   }
