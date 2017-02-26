@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "top-notch-productivity-f6632",
+  "private_key_id": "13933668668923207862232562140c77d7e397c0",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDQKr/JNxdtn+3b\nTfDyBcVGWzMRry4FbmQUxWny3MsmZjGuln1Md3lu2099YZtHI1FPI3/ZLLxTmn3w\nL45PDzqkbNq5d51vsx6yznjba9dXkIY5z0PTGw0wUrgSYUBasAW/zqfPy8CE7unr\nwkdqUqOA9tmpjc+EpM2ny7H/otI6Xt9PkiieNUnXHXpyg6KKN4+lcuEi3w8Wegdt\n+US7ADoxRH/vKvJNADENb07u5Qgj+Z7EJcBubBUMEUPDK8dq8CnWd2zkc6E7D/nF\nHBoOIAH0meRzOoZlWMKw1BkiER0VJ7bqXDSFsjrSrLU+v4cPnmNeOauGSPKqLrVW\n/wWqN8rrAgMBAAECggEBAJTaLL/mbBNQrBYIesWliLZRmogHuyHZGSmdLLCkX4P6\nyYXtSHW4bRXvLr0aYZ2RzJ+JY+9YxOYHcAyjBODVo/pVeGXs+aAY9lenutY0HA0a\nZFDMO9Sl4F1wmP1Tm1/9xG6uiGLXcLfd21lhWA3YP+CFI4nRxNU1v3U/++0vcaKY\nUHJSy18r9CGGhscWPFZp59XVvMdgFBaq6ZxllvsA33YvQx+jXOIN+osIo4LvCxSU\nbRraJ/AKy7HNw32PBL8YBwz+NdXC3I3IKYwTb5kfI4op0vskCY+32xQ4NKaVa1gu\nJTYr9gsIzXQZkzAJyblbNjAm2Ajn4qdlDkfmGjR7krkCgYEA5/F1UUO6g4W51zGH\nBA7S7ZpKALh+ut56ogKPWoPf38LDex980nj3uu9taIMVMYF4xS9EpkWxzx0zc25f\nHon/E77SjtnTNPIG3PYLQst6aT+SPUNcu2nOt+QqAG9Jac389hXpi3NAbzOKl7tS\n+jTNQyVSUL1lgFz9h4c1iTfmMDcCgYEA5cH8iUqLA4OovVcrvmWu0MXxmIwWa9BM\ncOaK6GHQHpvlNB/gOcS7kfdV88CmiN0qMkMUNQpE1jju4hrvd29UPrlbGBayC0ZL\ne6EwmlvXqKmByyMtJWtgHeheryYLGCvfXYsBiBPBpDgutfVfDDIZzJBjot9O1dS6\nwna53hsoGO0CgYAyTv46VS10b6ICmhyF9c0sekXI6Ducvrrsvw9m+6moeC88WnUR\nlelt45bgj2Yeac3PP1RtmDpcCSJqzCrXjekE2GQFVhvopQJ2FOwWXdo8T+yhWyYX\nBHkxC81McNcEmwhePBx/Ac2dERnjlV8HJELNaJ/1IU+Nyx22ss4a6EQGewKBgQCh\nR46yAPWcPetRHcPDHzWbr5dr8co7XDiMeAjCHwcstVorQMTxSDwytmBLfsxn/ngE\nWDnzEYZIqiZl6Wp3eFq2vP5I5oWMjIen/PpVIGs+Jd7KbaLfRYRu+hKc+COJkCJ3\nU4B7uQKQ+C8x41AZC4I4qpKGXiLEz1NZ9mV6l62J8QKBgQCp2TDscPZjXSgjUqeO\nHS+GtvENLXvTcWP6LaOsoEMfZ+mlz3DN/21AFuFH1YFV8O+rWivSPuOuuJwUrXXq\nXrB6az/+iFtkCzz2zKxoVdoGNwOR6vyRSdMo1/cux9jwo3n+vQ/1LbqJIaZFb843\nZbuyKeAMgbuyqDwKYmfPg3dBSw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-25w6p@top-notch-productivity-f6632.iam.gserviceaccount.com",
+  "client_id": "110043643357068949649",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-25w6p%40top-notch-productivity-f6632.iam.gserviceaccount.com"
+}

@@ -93,9 +93,8 @@ class App extends Component {
         } else {
           this.setState({loading: false})
         }
-
-
-
+      } else {
+        this.setState({loading: false})
       }
     })
   }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import TodayActivities from '../components/TodayActivities'
 import ActivityList from '../components/ActivityList'
-
+import { browserHistory } from 'react-router'
 
 class MainPage extends Component {
   constructor(props) {
@@ -13,7 +13,11 @@ class MainPage extends Component {
   }
 
   componentWillMount() {
-    const { day } = this.props;
+    const { day, user } = this.props;
+
+    if (!user.customerId) {
+      browserHistory.push('payment')
+    }
 
     if (day) {
       this.setState({currentView: 'DayInProgress'})

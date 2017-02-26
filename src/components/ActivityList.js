@@ -146,7 +146,7 @@ class ActivityList extends Component {
       chosen.id === activity.id)
   }
 
-  generateUUID(){
+  generateUUID() {
     let d = Date.now();
     if(window.performance && typeof window.performance.now === 'function'){
         d += performance.now(); //use high-precision timer if available
@@ -159,8 +159,17 @@ class ActivityList extends Component {
     return uuid;
   }
 
+  totalAmount() {
+    const { chosenActivities } = this.state;
+    let amount = 0;
+
+    chosenActivities.forEach(activity => amount += Number(activity.price));
+
+    return amount;
+  }
+
   render () {
-    const { isModalShown, isAllChosen } = this.state;
+    const { isModalShown, isAllChosen, chosenActivities } = this.state;
     const { activities = [] } = this.props.user;
     const { isChoosable = true, isEditable = true, isDeletable = true, isAddable = true } = this.props;
 
@@ -205,13 +214,17 @@ class ActivityList extends Component {
           style={{display: 'block', margin: 'auto'}}
           >  Return to main page  </button>
         }
-        {Boolean(activities.length) && isChoosable &&
-          <button
-          type="button block"
-          className="btn btn-secondary btn-lg"
-          onClick={() => this.startNewDay()}
-          style={{display: 'block', margin: 'auto'}}
-          >  Just do it!  </button>
+        {Boolean(chosenActivities.length) && isChoosable &&
+          <div>
+            <h5>By continuing you agree that you could be charged up to ${this.totalAmount()}</h5>
+            <h5> after 24 hours if you don't mark selected activities as done.</h5>
+             <button
+              type="button block"
+              className="btn btn-secondary btn-lg"
+              onClick={() => this.startNewDay()}
+              style={{display: 'block', margin: 'auto'}}
+              >  Just do it!  </button>
+          </div>
         }
         <Modal
           backdrop={true}
