@@ -7,7 +7,7 @@ import axios from 'axios'
 import '../style/react-card.css';
 import '../components/components.css';
 
-const serverUrl = 'http://localhost:3001'
+const serverUrl = 'https://top-notch-productivity.tk'
 
 class Payment extends Component {
   constructor(props) {
@@ -77,9 +77,7 @@ class Payment extends Component {
         } else {
           toastr.success('Saving card...');
           if (response.id) {
-            if (customerId) {
-              // update
-            } else {
+            
               axios.post(`${serverUrl}/customer`, {
                 token: response.id,
               })
@@ -90,7 +88,6 @@ class Payment extends Component {
                   browserHistory.push('/');
                 });
               })
-            }   
           }
         }
       }
