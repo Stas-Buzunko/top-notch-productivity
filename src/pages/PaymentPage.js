@@ -7,7 +7,7 @@ import axios from 'axios'
 import '../style/react-card.css';
 import '../components/components.css';
 
-const serverUrl = 'https://top-notch-productivity.tk'
+const serverUrl = 'http://localhost:3001'
 
 class Payment extends Component {
   constructor(props) {
