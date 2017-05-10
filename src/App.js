@@ -2,9 +2,11 @@ import React, { Component } from 'react';
 import firebase from 'firebase'
 import SignUp from './components/SignUp'
 import toastr from 'toastr'
-import { browserHistory } from 'react-router'
+import { browserHistory, IndexLink } from 'react-router'
 import 'toastr/build/toastr.min.css'
 import './App.css';
+import { Navbar, Nav, NavItem, Link, Button } from 'react-bootstrap'
+import { LinkContainer } from 'react-router-bootstrap'
 
 class App extends Component {
   constructor(props) {
@@ -69,9 +71,9 @@ class App extends Component {
         user = { ...user, uid: snapshot.key }
         this.setState({authenticated: true, user });
         localStorage.setItem('top-notch-productivity', JSON.stringify(user));
-        if (!user.activities || !user.activities.length) {
-          browserHistory.push('activities')          
-        }
+        // if (!user.activities || !user.activities.length) {
+        //   browserHistory.push('activities')          
+        // }
       }
     })
   }
@@ -120,11 +122,36 @@ class App extends Component {
     }
 
     return (
-      <div className="container">
-        {authenticated && <button onClick={() => firebase.auth().signOut()}> Sign out </button>}
-        <div className="outer">
-          <div className="inner">
-            {content}
+      <div>
+        <Navbar inverse collapseOnSelect>
+          <Navbar.Header>
+            <Navbar.Brand>
+              <IndexLink to="/">Top notch productivity</IndexLink>
+            </Navbar.Brand>
+            <Navbar.Toggle />
+          </Navbar.Header>
+          <Navbar.Collapse>
+            <Nav>
+              <LinkContainer to="/settings">
+                <NavItem eventKey={1}>Settings</NavItem>
+              </LinkContainer>
+              <LinkContainer to="/payment">
+                <NavItem eventKey={1}>Payment</NavItem>
+              </LinkContainer>
+              <LinkContainer to="/activities">
+                <NavItem eventKey={1}>Activities</NavItem>
+              </LinkContainer>
+            </Nav>
+            <Nav pullRight>
+              {authenticated && <Button type="button" className="btn btn-default navbar-btn" onClick={() => firebase.auth().signOut()}> Sign out </Button>}
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
+        <div className="container">
+          <div className="outer">
+            <div className="inner">
+              {content}
+            </div>
           </div>
         </div>
       </div>
