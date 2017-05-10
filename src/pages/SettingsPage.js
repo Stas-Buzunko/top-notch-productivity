@@ -46,7 +46,6 @@ class Settings extends Component {
       this.setState({error: ''});
       this.settingsCustomer({togglKey, workspace, currentRate, preference});
     } else {
-      this.setState({error: 'Please enter correct details'});
       toastr.error('Please enter correct details');
     }
   }
