@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import firebase from 'firebase'
 import { FormControl, Button } from 'react-bootstrap'
+import toastr from 'toastr'
 
 class Settings extends Component {
   constructor(props) {
@@ -15,21 +16,20 @@ class Settings extends Component {
 
   componentDidMount() {
     const userId = firebase.auth().currentUser.uid;
-    firebase.database().ref('/users/' + userId + '/settings').once('value').then(snapshot => {
+    firebase.database().ref('/users/' + userId + '/settings').once('value').then(snapshot => 
       this.setState({
         togglKey: snapshot.val().togglKey,
         workspace: snapshot.val().workspace,
         currentRate: snapshot.val().currentRate,
         preference: snapshot.val().preference
       })
-    });
+    );
   }
 
   handleInputChange(field, value) {
     this.setState({
       [field]: value,
     })
-    console.log(this.state)
   }
 
   numberChecker(value) {
@@ -37,17 +37,17 @@ class Settings extends Component {
       this.setState({
         currentRate: value,
       })
-      console.log(this.state)
     }
   }
 
-  handleSubmit() {
+  handleSubmit = () => {
     const { togglKey, workspace, currentRate, preference } = this.state
     if (togglKey.length && workspace.length && currentRate.length) {
       this.setState({error: ''});
       this.settingsCustomer({togglKey, workspace, currentRate, preference});
     } else {
       this.setState({error: 'Please enter correct details'});
+      toastr.error('Please enter correct details');
     }
   }
 
@@ -59,7 +59,7 @@ class Settings extends Component {
       workspace,
       currentRate,
       preference
-    })   
+    }).then(() => toastr.success('Your settings info saved!'))
   }
 
   render() {
@@ -73,7 +73,7 @@ class Settings extends Component {
           <option value={true}>24h</option>
           <option value={false}>till midnight</option>
         </FormControl><br />
-        <Button onClick={() => this.handleSubmit()}>Save settings</Button>
+        <Button onClick={this.handleSubmit}>Save settings</Button>
       </div>
     )
   }
