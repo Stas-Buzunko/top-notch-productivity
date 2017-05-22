@@ -9,7 +9,7 @@ import Settings from './pages/SettingsPage';
 
 export default (
   <Route path="/" component={App}>
-    <IndexRoute component={MainPage} />
+    <IndexRoute component={Settings} />
     <Route path="activities" component={ActivitiesPage} />
     <Route path="payment" component={Payment} />
     <Route path="settings" component={Settings} />

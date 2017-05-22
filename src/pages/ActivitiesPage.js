@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import ActivityList from '../components/ActivityList'
+import NewActivityList from '../components/NewActivityList'
 
 class ActivitiesPage extends Component {
   render() {
     const { user } = this.props;
     return (
       <div>
-         <ActivityList isChoosable={false} user={user} />
+        <NewActivityList isChoosable={false} user={user} />
       </div>
     )
   }
