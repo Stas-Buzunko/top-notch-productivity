@@ -5,6 +5,7 @@ import firebase from 'firebase'
 import toastr from 'toastr'
 import moment from 'moment'
 import CountDown from './CountDown'
+import axios from 'axios'
 
 class NewActivityList extends Component {
   constructor(props) {
@@ -15,7 +16,12 @@ class NewActivityList extends Component {
       money: '',
       how_long: true,
       startedAt: '',
-      isModalShown: true
+      isModalShown: true,
+      workspace: '',
+      togglKey: '',
+      email: '',
+      user_ids: '',
+      time: ''
     }
   }
 
@@ -24,20 +30,52 @@ class NewActivityList extends Component {
     firebase.database().ref('/users/' + userId + '/settings').once('value').then(snapshot => {
       const currentRate = (snapshot.val().currentRate * 0.4)
       this.setState({
-        money: currentRate
+        money: currentRate,
+        how_long: snapshot.val().preference,
+        workspace: snapshot.val().workspace,
+        togglKey: snapshot.val().togglKey,
+        email: snapshot.val().email,
+        user_ids: snapshot.val().user_ids
       })
     })
+
     firebase.database().ref('/users/' + userId + '/challenge').once('value').then(snapshot => {
       if (snapshot.val().startedAt + 86400000 > moment()) {
         this.setState({
           hours: snapshot.val().hours,
           money: snapshot.val().money,
           how_long: snapshot.val().how_long,
+          timeWorkedBefore: snapshot.val().timeWorkedBefore,
           startedAt: snapshot.val().startedAt,
           isModalShown: false
-        })    
+        })
+        this.toggle()    
       }
     })
+  }
+
+  toggle() {
+    const authStr = 'Basic ' + window.btoa(this.state.togglKey + ':api_token')
+    const time = moment(this.state.startedAt).format('YYYY-MM-DD')
+    axios({
+      headers: {
+        Authorization: authStr
+      },
+      url: 'https://toggl.com/reports/api/v2/details',
+      params: {
+        user_agent: this.state.email,
+        workspace_id: this.state.workspace,
+        user_ids: this.state.user_ids,
+        since: time
+      }
+    })
+    .then((response) => {
+      this.setState({
+        time: response.data.total_grand
+      })
+      console.log(response)
+    })
+    .catch((error) => {console.log(error)})
   }
 
   numberChecker(field, value) {
@@ -49,17 +87,42 @@ class NewActivityList extends Component {
   }
 
   addChallenge = () => {
-    const { hours, money, how_long } = this.state
-    if ((hours.length > 0) && (money > 0)) {
-      this.setState({error: ''});
-      this.challengeSave({hours, money, how_long});
-    } else {
-      toastr.error('Please enter correct details');
-    }
+    const authStr = 'Basic ' + window.btoa(this.state.togglKey + ':api_token')
+    const time = moment().format('YYYY-MM-DD')
+    axios({
+      headers: {
+        Authorization: authStr
+      },
+      url: 'https://toggl.com/reports/api/v2/details',
+      params: {
+        user_agent: this.state.email,
+        workspace_id: this.state.workspace,
+        user_ids: this.state.user_ids,
+        since: time
+      }
+    })
+    .then((response) => {
+      console.log(response)
+      const timeWorkedBefore = response.data.total_grand
+      this.setState({
+        timeWorkedBefore: timeWorkedBefore
+      })
+
+      const { hours, money, how_long } = this.state
+      if ((hours.length > 0) && (money > 0)) {
+        this.setState({error: ''});
+        this.challengeSave({hours, money, how_long, timeWorkedBefore});
+      } else {
+        toastr.error('Please enter correct details');
+      }
+    })
+    .catch((error) => {console.log(error)})
+
+
   }
 
   challengeSave(params) {
-    const { hours, money, how_long } = params
+    const { hours, money, how_long, timeWorkedBefore } = params
     const userUid = this.props.user.uid
     const key = firebase.database().ref('days').push().key
     firebase.database().ref('days/' + key).update({
@@ -67,6 +130,7 @@ class NewActivityList extends Component {
       money,
       how_long,
       userUid,
+      timeWorkedBefore,
       startedAt: Date.now(),
       isDayOver: false,
       isCharged: false
@@ -76,6 +140,7 @@ class NewActivityList extends Component {
       money,
       how_long,
       userUid,
+      timeWorkedBefore,
       startedAt: Date.now(),
       isDayOver: false,
       isCharged: false,
@@ -90,27 +155,31 @@ class NewActivityList extends Component {
   render () {
     return (
       <div>
-        <Table striped bordered condensed hover>
-          <thead>
-            <tr>
-              <th>Number of hours:</th>
-              <th>Amount of money:</th>
-              <th>Will be over:</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.state.startedAt ? (
+        {this.state.startedAt ? (
+          <Table striped bordered condensed hover>
+            <thead>
               <tr>
-                  <td><h5>{this.state.hours}</h5></td>
-                  <td><h5>{this.state.money}</h5></td>
-                  <td><CountDown how_long={this.state.how_long} hours={this.state.hours} startedAt={this.state.startedAt}/></td>
+                <th>Number of hours:</th>
+                <th>Amount of money:</th>
+                <th>Will be over:</th>
+                <th>How much time you worked:</th>
               </tr>
-            ) : (<tr><td></td><td></td><td></td></tr>)}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              <tr>
+                <td><h5>{this.state.hours}</h5></td>
+                <td><h5>{this.state.money}</h5></td>
+                <td><CountDown how_long={this.state.how_long} hours={this.state.hours} startedAt={this.state.startedAt}/></td>
+                {this.state.time ? (
+                  <td><h5>{(this.state.time - this.state.timeWorkedBefore) / 3600000}</h5></td>
+                ) : (<td><h5></h5></td>)}
+              </tr>
+            </tbody>
+          </Table>
+        ) : (<Button type="button" className="btn btn-primary" data-dismiss="modal" onClick={() => this.setState({isModalShown: true})}>Open Challenge</Button>)}
         <Modal
           backdrop={true}
-          onHide={() => this.setState({isModalShown: false, hours: '', money: ''})}
+          onHide={() => this.setState({isModalShown: false, hours: ''})}
           show={this.state.isModalShown}>
           <Modal.Header>
             <Modal.Title>New challenge</Modal.Title>
