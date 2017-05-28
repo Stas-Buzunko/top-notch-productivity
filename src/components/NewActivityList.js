@@ -9,7 +9,7 @@ import axios from 'axios'
 
 class NewActivityList extends Component {
   constructor(props) {
-    super(props);
+    super(props)
 
     this.state = {
       hours: '',
@@ -26,11 +26,15 @@ class NewActivityList extends Component {
   }
 
   componentDidMount() {
-    const userId = firebase.auth().currentUser.uid;
-    firebase.database().ref('/users/' + userId + '/settings').once('value').then(snapshot => {
-      const currentRate = (snapshot.val().currentRate * 0.4)
+    const { uid } = this.props.user
+    firebase.database().ref('/users/' + uid + '/settings').once('value').then(snapshot => {
+      if (snapshot.val().currentRate) {
+        const currentRate = (snapshot.val().currentRate * 0.4)
+        this.setState({
+          money: currentRate
+        })
+      }
       this.setState({
-        money: currentRate,
         how_long: snapshot.val().preference,
         workspace: snapshot.val().workspace,
         togglKey: snapshot.val().togglKey,
@@ -39,7 +43,7 @@ class NewActivityList extends Component {
       })
     })
 
-    firebase.database().ref('/users/' + userId + '/challenge').once('value').then(snapshot => {
+    firebase.database().ref('/users/' + uid + '/challenge').once('value').then(snapshot => {
       if (snapshot.val().startedAt + 86400000 > moment()) {
         this.setState({
           hours: snapshot.val().hours,
@@ -110,36 +114,34 @@ class NewActivityList extends Component {
 
       const { hours, money, how_long } = this.state
       if ((hours.length > 0) && (money > 0)) {
-        this.setState({error: ''});
-        this.challengeSave({hours, money, how_long, timeWorkedBefore});
+        this.challengeSave({hours, money, how_long, timeWorkedBefore})
       } else {
-        toastr.error('Please enter correct details');
+        toastr.error('Please enter correct details')
       }
     })
     .catch((error) => {console.log(error)})
-
-
   }
 
   challengeSave(params) {
     const { hours, money, how_long, timeWorkedBefore } = params
-    const userUid = this.props.user.uid
+    const { uid } = this.props.user
     const key = firebase.database().ref('days').push().key
     firebase.database().ref('days/' + key).update({
       hours,
       money,
       how_long,
-      userUid,
+      uid,
       timeWorkedBefore,
       startedAt: Date.now(),
       isDayOver: false,
       isCharged: false
-    }).then(() => toastr.success('Your Activity saved!'))
-    firebase.database().ref('users/' + userUid + '/challenge').set({
+    })
+    .then(() => toastr.success('Your Activity saved!'))
+    firebase.database().ref('users/' + uid + '/challenge').set({
       hours,
       money,
       how_long,
-      userUid,
+      uid,
       timeWorkedBefore,
       startedAt: Date.now(),
       isDayOver: false,
@@ -209,8 +211,8 @@ class NewActivityList extends Component {
           </Modal.Footer>
         </Modal>
       </div>
-    );
+    )
   }
 }
 
-export default NewActivityList;
+export default NewActivityList

@@ -17,8 +17,8 @@ class Settings extends Component {
   }
 
   componentDidMount() {
-    const userId = firebase.auth().currentUser.uid;
-    firebase.database().ref('/users/' + userId + '/settings').once('value').then(snapshot => 
+    const { uid } = this.props.user
+    firebase.database().ref('/users/' + uid + '/settings').once('value').then(snapshot => 
       this.setState({
         togglKey: snapshot.val().togglKey,
         workspace: snapshot.val().workspace,
@@ -64,7 +64,8 @@ class Settings extends Component {
       currentRate,
       user_ids,
       preference
-    }).then(() => toastr.success('Your settings info saved!'))
+    })
+    .then(() => toastr.success('Your settings info saved!'))
   }
 
   render() {
