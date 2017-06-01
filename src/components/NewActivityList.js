@@ -28,32 +28,39 @@ class NewActivityList extends Component {
   componentDidMount() {
     const { uid } = this.props.user
     firebase.database().ref('/users/' + uid + '/settings').once('value').then(snapshot => {
-      if (snapshot.val().currentRate) {
-        const currentRate = (snapshot.val().currentRate * 0.4)
+      const snapshotval = snapshot.val()
+      const { preference, workspace, togglKey, email, user_ids, currentRate } = snapshot.val()
+      if (snapshotval !== null) {
+        if (currentRate) {
+          this.setState({
+            money: currentRate * 0.4
+          })
+        }
         this.setState({
-          money: currentRate
+          how_long: preference,
+          workspace,
+          togglKey,
+          email,
+          user_ids
         })
       }
-      this.setState({
-        how_long: snapshot.val().preference,
-        workspace: snapshot.val().workspace,
-        togglKey: snapshot.val().togglKey,
-        email: snapshot.val().email,
-        user_ids: snapshot.val().user_ids
-      })
     })
 
     firebase.database().ref('/users/' + uid + '/challenge').once('value').then(snapshot => {
-      if (snapshot.val().startedAt + 86400000 > moment()) {
-        this.setState({
-          hours: snapshot.val().hours,
-          money: snapshot.val().money,
-          how_long: snapshot.val().how_long,
-          timeWorkedBefore: snapshot.val().timeWorkedBefore,
-          startedAt: snapshot.val().startedAt,
-          isModalShown: false
-        })
-        this.toggle()    
+      const snapshotval = snapshot.val()
+      const { hours, money, how_long, timeWorkedBefore, startedAt } = snapshot.val()
+      if (snapshotval !== null) {
+        if (snapshot.val().startedAt + 86400000 > moment()) {
+          this.setState({
+            hours,
+            money,
+            how_long,
+            timeWorkedBefore,
+            startedAt,
+            isModalShown: false
+          })
+          this.toggle()    
+        }
       }
     })
   }
@@ -73,13 +80,8 @@ class NewActivityList extends Component {
         since: time
       }
     })
-    .then((response) => {
-      this.setState({
-        time: response.data.total_grand
-      })
-      console.log(response)
-    })
-    .catch((error) => {console.log(error)})
+    .then(response => this.setState({ time: response.data.total_grand }))
+    .catch(error => console.log(error))
   }
 
   numberChecker(field, value) {
@@ -108,9 +110,7 @@ class NewActivityList extends Component {
     .then((response) => {
       console.log(response)
       const timeWorkedBefore = response.data.total_grand
-      this.setState({
-        timeWorkedBefore: timeWorkedBefore
-      })
+      this.setState({ timeWorkedBefore })
 
       const { hours, money, how_long } = this.state
       if ((hours.length > 0) && (money > 0)) {
@@ -126,28 +126,31 @@ class NewActivityList extends Component {
     const { hours, money, how_long, timeWorkedBefore } = params
     const { uid } = this.props.user
     const key = firebase.database().ref('days').push().key
+    const startedAt = Date.now()
     firebase.database().ref('days/' + key).update({
       hours,
       money,
       how_long,
       uid,
       timeWorkedBefore,
-      startedAt: Date.now(),
+      startedAt,
       isDayOver: false,
       isCharged: false
     })
     .then(() => toastr.success('Your Activity saved!'))
-    firebase.database().ref('users/' + uid + '/challenge').set({
-      hours,
-      money,
-      how_long,
-      uid,
-      timeWorkedBefore,
-      startedAt: Date.now(),
-      isDayOver: false,
-      isCharged: false,
-      key: key
-    })
+    .then(
+      firebase.database().ref('users/' + uid + '/challenge').set({
+        hours,
+        money,
+        how_long,
+        uid,
+        timeWorkedBefore,
+        startedAt,
+        isDayOver: false,
+        isCharged: false,
+        key: key
+      })
+    )
     this.setState({
       isModalShown: false,
       startedAt: Date.now()

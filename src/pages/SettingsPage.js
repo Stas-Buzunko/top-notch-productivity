@@ -18,16 +18,20 @@ class Settings extends Component {
 
   componentDidMount() {
     const { uid } = this.props.user
-    firebase.database().ref('/users/' + uid + '/settings').once('value').then(snapshot => 
-      this.setState({
-        togglKey: snapshot.val().togglKey,
-        workspace: snapshot.val().workspace,
-        email: snapshot.val().email,
-        user_ids: snapshot.val().user_ids,
-        currentRate: snapshot.val().currentRate,
-        preference: snapshot.val().preference
-      })
-    );
+    firebase.database().ref('/users/' + uid + '/settings').once('value').then(snapshot => {
+      const snapshotval = snapshot.val()
+      const { togglKey, workspace, email, user_ids, currentRate, preference } = snapshot.val()
+      if (snapshotval !== null) {
+        this.setState({
+          togglKey,
+          workspace,
+          email,
+          user_ids,
+          currentRate,
+          preference
+        })
+      }
+    });
   }
 
   handleInputChange(field, value) {
