@@ -75,7 +75,6 @@ class Payment extends Component {
             toastr.error('Something went wront. Please, try again.');
           }
         } else {
-          console.log(response)
           toastr.success('Saving card...');
           if (response.id) {
             

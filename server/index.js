@@ -18,9 +18,9 @@ admin.initializeApp({
   databaseURL: "https://top-notch-productivity-f6632.firebaseio.com"
 });
 
-// cron.schedule('*/2 * * * * *', function(){
-//   charge.charge()
-// });
+cron.schedule('*/10 * * * * *', function(){
+  charge.charge()
+});
 
 app.get('/', function (req, res) {
   res.send('Hello world!');
