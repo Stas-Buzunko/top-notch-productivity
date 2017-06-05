@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
-import './components.css';
+import React, { Component } from 'react'
+import './components.css'
+import { Button } from 'react-bootstrap'
 
 class SignUp extends Component {
   render () {
     return (
       <div className="outer"  style={{ height:'300px'}}>
         <span className="inner">
-          <button onClick={this.props.signUpWithGoogle} >Google</button>
+          <Button onClick={this.props.signUpWithGoogle} >Google</Button>
         </span>
       </div>
     );
