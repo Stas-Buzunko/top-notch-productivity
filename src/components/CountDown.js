@@ -18,14 +18,14 @@ class CountDown extends Component {
   }
 
   renderTime() {
+    const left
     if (this.props.how_long) {
       const { startedAt } = this.props;
-      const left = Number(startedAt) + 24 * 60 * 60 * 1000 - Date.now();
-      this.calculationTime(left)
+      left = Number(startedAt) + 24 * 60 * 60 * 1000 - Date.now()
     } else {
-      const left = 24 * 60 * 60 * 1000 - Date.now() % (24 * 60 * 60 * 1000);
-      this.calculationTime(left)
+      left = 24 * 60 * 60 * 1000 - Date.now() % (24 * 60 * 60 * 1000)
     }
+    this.calculationTime(left)
   }
 
   calculationTime(left) {
