@@ -18,7 +18,7 @@ class CountDown extends Component {
   }
 
   renderTime() {
-    const left
+    let left
     if (this.props.how_long) {
       const { startedAt } = this.props;
       left = Number(startedAt) + 24 * 60 * 60 * 1000 - Date.now()
