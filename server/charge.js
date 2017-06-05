@@ -49,11 +49,9 @@ exports.charge = function() {
                 }
               })
               .then(() => {
-                snap[key].isCharged = true,
-                snap[key].isDayOver = true,
                 admin.database().ref('/days/' + key).update({
-                  isCharged: snap[key].isCharged,
-                  isDayOver: snap[key].isDayOver
+                  isCharged: true,
+                  isDayOver: true
                 })
               })
             }
