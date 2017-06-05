@@ -23,7 +23,7 @@ class Payment extends Component {
   };
 
   componentDidMount() {
-    window.Stripe.setPublishableKey('pk_test_eriYrM6XlEqlCe7n3LQrlOVA');
+    window.Stripe.setPublishableKey('pk_test_5n8G7dKz3Voa7kG3K69MW1xs');
   }
 
   cvcChecker(value) {

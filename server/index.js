@@ -1,10 +1,13 @@
 var express = require('express');
-var serviceAccount = require("./key.json");
-var stripeToken = 'sk_test_10RNdGITLVFyKQ5MYvpcBj4U';
-var stripe = require("stripe")(stripeToken);
-var cors = require('cors');
 var bodyParser = require("body-parser");
 var admin = require("firebase-admin");
+var serviceAccount = require("./key.json");
+var cors = require('cors');
+var stripeToken = 'sk_test_Vv6iDSIXAgbMI6GqUYPISD3a';
+var stripe = require("stripe")(stripeToken);
+var cron = require('node-cron');
+var charge = require('./charge');
+var firebase = require('firebase')
 
 var app = express();
 app.use(cors({credentials: true, origin: true}));
@@ -13,6 +16,10 @@ app.use(bodyParser.json())
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://top-notch-productivity-f6632.firebaseio.com"
+});
+
+cron.schedule('*/10 * * * * *', function(){
+  charge.charge()
 });
 
 app.get('/', function (req, res) {
