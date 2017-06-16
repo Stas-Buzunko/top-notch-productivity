@@ -8,6 +8,7 @@ var stripe = require("stripe")(stripeToken);
 exports.charge = function() {
   admin.database().ref('/days').orderByChild('isDayOver').equalTo(false).once('value').then(function(snapshot) {
     var snap = snapshot.val()
+    console.log(snap)
     var left
     for (key in snap) {
       if (snap[key].how_long == true) {
@@ -17,20 +18,23 @@ exports.charge = function() {
       }
 
       if (Date.now() > left) {
-        admin.database().ref('/users/' + snap[key].userUid).once('value').then((snapshot) => {
+        admin.database().ref('/users/' + snap[key].uid).once('value').then((snapshot) => {
+          console.log('1S')
           const time = moment(snap[key].startedAt).format('YYYY-MM-DD')
+          const settingsData = snapshot.val().settings
+          const authStr = 'Basic ' + btoa(settingsData.togglKey + ':api_token')
 
-          if (snapshot.val().togglKey && snapshot.val().email && snapshot.val().workspace && snapshot.val().user_ids && snapshot.val().hubstaffAuthToken) {
-
+          if (settingsData.togglKey && settingsData.email && settingsData.workspace && settingsData.user_ids && settingsData.hubstaffAuthToken) {
+            
             const toggl = axios({
               headers: {
                 Authorization: authStr
               },
               url: 'https://toggl.com/reports/api/v2/details',
               params: {
-                user_agent: this.state.email,
-                workspace_id: this.state.workspace,
-                user_ids: this.state.user_ids,
+                user_agent: settingsData.email,
+                workspace_id: settingsData.workspace,
+                user_ids: settingsData.user_ids,
                 since: time
               }
             })
@@ -38,8 +42,8 @@ exports.charge = function() {
             const hubstaff = axios({
               url: 'https://api.hubstaff.com/v1/custom/by_date/my',
               headers: {
-                'Auth-Token': this.state.hubstaffAuthToken,
-                'App-Token': this.state.hubstaffAppToken
+                'Auth-Token': settingsData.hubstaffAuthToken,
+                'App-Token': settingsData.hubstaffAppToken
               },
               params: {
                 start_date: time,
@@ -53,7 +57,7 @@ exports.charge = function() {
               if (toggl + hubstaff - snap[key].timeWorkedBefore - snap[key].timeWorkedBeforeHub < snap[key].hours * 60 * 60 * 1000) {
 
                 stripe.charges.create({
-                  amount: snap[key].money * 100,
+                  amount: Math.floor(snap[key].money * 100),
                   currency: "usd",
                   description: "Example charge",
                   customer: snapshot.val().customerId
@@ -73,12 +77,12 @@ exports.charge = function() {
               }
             })
             .catch(error => console.log(error))
-          } else if (this.state.hubstaffAuthToken) {
+          } else if (settingsData.hubstaffAuthToken) {
             axios({
               url: 'https://api.hubstaff.com/v1/custom/by_date/my',
               headers: {
-                'Auth-Token': snapshot.val().hubstaffAuthToken,
-                'App-Token': snapshot.val().hubstaffAppToken
+                'Auth-Token': settingsData.hubstaffAuthToken,
+                'App-Token': settingsData.hubstaffAppToken
               },
               params: {
                 start_date: time,
@@ -89,7 +93,7 @@ exports.charge = function() {
               if (response.data.organizations.reduce((sum, current) => {return (sum + current.duration)}, 0) - snap[key].timeWorkedBeforeHub < snap[key].hours * 60 * 60 * 1000) {
 
                 stripe.charges.create({
-                  amount: snap[key].money * 100,
+                  amount: Math.floor(snap[key].money * 100),
                   currency: "usd",
                   description: "Example charge",
                   customer: snapshot.val().customerId
@@ -109,8 +113,7 @@ exports.charge = function() {
               }
             })
             .catch(error => console.log(error))
-          } else if (this.state.togglKey && this.state.email && this.state.workspace && this.state.user_ids) {
-            const authStr = 'Basic ' + btoa(snapshot.val().settings.togglKey + ':api_token')
+          } else if (settingsData.togglKey && settingsData.email && settingsData.workspace && settingsData.user_ids) {
 
             axios({
               headers: {
@@ -118,9 +121,9 @@ exports.charge = function() {
               },
               url: 'https://toggl.com/reports/api/v2/details',
               params: {
-                user_agent: snapshot.val().settings.email,
-                workspace_id: snapshot.val().settings.workspace,
-                user_ids: snapshot.val().settings.user_ids,
+                user_agent: settingsData.email,
+                workspace_id: settingsData.workspace,
+                user_ids: settingsData.user_ids,
                 since: time
               }
             })
@@ -128,7 +131,7 @@ exports.charge = function() {
               if (response.data.total_grand - snap[key].timeWorkedBefore < snap[key].hours * 60 * 60 * 1000) {
 
                 stripe.charges.create({
-                  amount: snap[key].money * 100,
+                  amount: Math.floor(snap[key].money * 100),
                   currency: "usd",
                   description: "Example charge",
                   customer: snapshot.val().customerId
@@ -147,7 +150,7 @@ exports.charge = function() {
                 })
               }
             })
-            .catch(error => console.log(error))          
+            .catch(error => console.log(error))
           }
 
 
