@@ -17,46 +17,142 @@ exports.charge = function() {
       }
 
       if (Date.now() > left) {
-        admin.database().ref('/users/' + snap[key].userUid).once('value').then((snapshot) => {
-          
-          const authStr = 'Basic ' + btoa(snapshot.val().settings.togglKey + ':api_token')
+        admin.database().ref('/users/' + snap[key].uid).once('value').then((snapshot) => {
           const time = moment(snap[key].startedAt).format('YYYY-MM-DD')
-          axios({
-            headers: {
-              Authorization: authStr
-            },
-            url: 'https://toggl.com/reports/api/v2/details',
-            params: {
-              user_agent: snapshot.val().settings.email,
-              workspace_id: snapshot.val().settings.workspace,
-              user_ids: snapshot.val().settings.user_ids,
-              since: time
-            }
-          })
-          .then(response => {
-            if (response.data.total_grand - snap[key].timeWorkedBefore < snap[key].hours * 60 * 60 * 1000) {
+          const settingsData = snapshot.val().settings
+          const authStr = 'Basic ' + btoa(settingsData.togglKey + ':api_token')
 
-              stripe.charges.create({
-                amount: snap[key].money * 100,
-                currency: "usd",
-                description: "Example charge",
-                customer: snapshot.val().customerId
-              }, function(err, charge) {
-                if (err) {
-                  console.log(err)
-                } else {
-                  console.log('Chargeeeeee')
-                }
-              })
-              .then(() => {
-                admin.database().ref('/days/' + key).update({
-                  isCharged: true,
-                  isDayOver: true
+          if (settingsData.togglKey && settingsData.email && settingsData.workspace && settingsData.user_ids && settingsData.hubstaffAuthToken) {
+            
+            const toggl = axios({
+              headers: {
+                Authorization: authStr
+              },
+              url: 'https://toggl.com/reports/api/v2/details',
+              params: {
+                user_agent: settingsData.email,
+                workspace_id: settingsData.workspace,
+                user_ids: settingsData.user_ids,
+                since: time
+              }
+            })
+
+            const hubstaff = axios({
+              url: 'https://api.hubstaff.com/v1/custom/by_date/my',
+              headers: {
+                'Auth-Token': settingsData.hubstaffAuthToken,
+                'App-Token': settingsData.hubstaffAppToken
+              },
+              params: {
+                start_date: time,
+                end_date: moment().format('YYYY-MM-DD')
+              }
+            })
+            Promise.all([ toggl, hubstaff ])
+            .then(response => {
+              const hubstaff = response[1].data.organizations.reduce((sum, current) => {return (sum + current.duration)}, 0)
+              const toggl = response[0].data.total_grand
+              if (toggl + hubstaff - snap[key].timeWorkedBefore - snap[key].timeWorkedBeforeHub < snap[key].hours * 60 * 60 * 1000) {
+
+                stripe.charges.create({
+                  amount: Math.floor(snap[key].money * 100),
+                  currency: "usd",
+                  description: "Example charge",
+                  customer: snapshot.val().customerId
+                }, function(err, charge) {
+                  if (err) {
+                    console.log(err)
+                  } else {
+                    console.log('Chargeeeeee')
+                  }
                 })
-              })
-            }
-          })
-          .catch(error => console.log(error))
+                .then(() => {
+                  admin.database().ref('/days/' + key).update({
+                    isCharged: true,
+                    isDayOver: true
+                  })
+                })
+              }
+            })
+            .catch(error => console.log(error))
+          } else if (settingsData.hubstaffAuthToken) {
+            axios({
+              url: 'https://api.hubstaff.com/v1/custom/by_date/my',
+              headers: {
+                'Auth-Token': settingsData.hubstaffAuthToken,
+                'App-Token': settingsData.hubstaffAppToken
+              },
+              params: {
+                start_date: time,
+                end_date: moment().format('YYYY-MM-DD')
+              }
+            })
+            .then(response => {
+              if (response.data.organizations.reduce((sum, current) => {return (sum + current.duration)}, 0) - snap[key].timeWorkedBeforeHub < snap[key].hours * 60 * 60 * 1000) {
+
+                stripe.charges.create({
+                  amount: Math.floor(snap[key].money * 100),
+                  currency: "usd",
+                  description: "Example charge",
+                  customer: snapshot.val().customerId
+                }, function(err, charge) {
+                  if (err) {
+                    console.log(err)
+                  } else {
+                    console.log('Chargeeeeee')
+                  }
+                })
+                .then(() => {
+                  admin.database().ref('/days/' + key).update({
+                    isCharged: true,
+                    isDayOver: true
+                  })
+                })
+              }
+            })
+            .catch(error => console.log(error))
+          } else if (settingsData.togglKey && settingsData.email && settingsData.workspace && settingsData.user_ids) {
+
+            axios({
+              headers: {
+                Authorization: authStr
+              },
+              url: 'https://toggl.com/reports/api/v2/details',
+              params: {
+                user_agent: settingsData.email,
+                workspace_id: settingsData.workspace,
+                user_ids: settingsData.user_ids,
+                since: time
+              }
+            })
+            .then(response => {
+              if (response.data.total_grand - snap[key].timeWorkedBefore < snap[key].hours * 60 * 60 * 1000) {
+
+                stripe.charges.create({
+                  amount: Math.floor(snap[key].money * 100),
+                  currency: "usd",
+                  description: "Example charge",
+                  customer: snapshot.val().customerId
+                }, function(err, charge) {
+                  if (err) {
+                    console.log(err)
+                  } else {
+                    console.log('Chargeeeeee')
+                  }
+                })
+                .then(() => {
+                  admin.database().ref('/days/' + key).update({
+                    isCharged: true,
+                    isDayOver: true
+                  })
+                })
+              }
+            })
+            .catch(error => console.log(error))
+          }
+
+
+
         })
       }
     }

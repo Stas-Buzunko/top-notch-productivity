@@ -21,7 +21,10 @@ class NewActivityList extends Component {
       togglKey: '',
       email: '',
       user_ids: '',
-      time: ''
+      time: '',
+      timeHub: '',
+      timeWorkedBefore: '',
+      timeWorkedBeforeHub: ''
     }
   }
 
@@ -29,7 +32,7 @@ class NewActivityList extends Component {
     const { uid } = this.props.user
     firebase.database().ref('/users/' + uid + '/settings').once('value').then(snapshot => {
       const snapshotval = snapshot.val()
-      const { preference, workspace, togglKey, email, user_ids, currentRate } = snapshot.val()
+      const { preference, workspace, togglKey, email, user_ids, currentRate, hubstaffAuthToken, hubstaffAppToken } = snapshot.val()
       if (snapshotval !== null) {
         if (currentRate) {
           this.setState({
@@ -41,47 +44,92 @@ class NewActivityList extends Component {
           workspace,
           togglKey,
           email,
-          user_ids
+          user_ids,
+          hubstaffAuthToken,
+          hubstaffAppToken
         })
       }
     })
 
     firebase.database().ref('/users/' + uid + '/challenge').once('value').then(snapshot => {
       const snapshotval = snapshot.val()
-      const { hours, money, how_long, timeWorkedBefore, startedAt } = snapshot.val()
+      const { hours, money, how_long, timeWorkedBefore, timeWorkedBeforeHub, startedAt } = snapshot.val()
       if (snapshotval !== null) {
-        if (snapshot.val().startedAt + 86400000 > moment()) {
-          this.setState({
-            hours,
-            money,
-            how_long,
-            timeWorkedBefore,
-            startedAt,
-            isModalShown: false
-          })
-          this.toggle()    
+        if (how_long) {
+          if (startedAt + 86400000 > moment()) {
+            this.setState({
+              hours,
+              money,
+              how_long,
+              timeWorkedBefore,
+              startedAt,
+              timeWorkedBeforeHub,
+              isModalShown: false
+            })
+            this.toggl()
+            this.hubstaff()
+          }
+        } else {
+          if (startedAt + 86400000 - (startedAt % 86400000) > moment()) {
+            this.setState({
+              hours,
+              money,
+              how_long,
+              timeWorkedBefore,
+              startedAt,
+              timeWorkedBeforeHub,
+              isModalShown: false
+            })
+            this.toggl()
+            this.hubstaff()
+          }
         }
       }
     })
   }
 
-  toggle() {
-    const authStr = 'Basic ' + window.btoa(this.state.togglKey + ':api_token')
-    const time = moment(this.state.startedAt).format('YYYY-MM-DD')
-    axios({
-      headers: {
-        Authorization: authStr
-      },
-      url: 'https://toggl.com/reports/api/v2/details',
-      params: {
-        user_agent: this.state.email,
-        workspace_id: this.state.workspace,
-        user_ids: this.state.user_ids,
-        since: time
-      }
-    })
-    .then(response => this.setState({ time: response.data.total_grand }))
-    .catch(error => console.log(error))
+  hubstaff() {
+    if (this.state.hubstaffAuthToken) {
+      const time = moment(this.state.startedAt).format('YYYY-MM-DD')
+
+      axios({
+        url: 'https://api.hubstaff.com/v1/custom/by_date/my',
+        headers: {
+          'Auth-Token': this.state.hubstaffAuthToken,
+          'App-Token': this.state.hubstaffAppToken
+        },
+        params: {
+          start_date: time,
+          end_date: moment().format('YYYY-MM-DD')
+        }
+      })
+      .then(response => {
+        const time = response.data.organizations.reduce((sum, current) => {return (sum + current.duration)}, 0)
+        this.setState({timeHub: time})
+      })
+      .catch(error => console.log(error))
+    }
+  }
+
+  toggl() {
+    if (this.state.togglKey && this.state.email && this.state.workspace && this.state.user_ids) {
+      const authStr = 'Basic ' + window.btoa(this.state.togglKey + ':api_token')
+      const time = moment(this.state.startedAt).format('YYYY-MM-DD')
+      axios({
+        headers: {
+          Authorization: authStr
+        },
+        url: 'https://toggl.com/reports/api/v2/details',
+        params: {
+          user_agent: this.state.email,
+          workspace_id: this.state.workspace,
+          user_ids: this.state.user_ids,
+          since: time
+        }
+      })
+      .then(response => this.setState({ time: response.data.total_grand }))
+      .catch(error => console.log(error))
+    }
   }
 
   numberChecker(field, value) {
@@ -93,46 +141,121 @@ class NewActivityList extends Component {
   }
 
   addChallenge = () => {
-    const authStr = 'Basic ' + window.btoa(this.state.togglKey + ':api_token')
+    const { togglKey, email, workspace, user_ids, hubstaffAuthToken, hubstaffAppToken } = this.state
+    const authStr = 'Basic ' + window.btoa(togglKey + ':api_token')
     const time = moment().format('YYYY-MM-DD')
-    axios({
-      headers: {
-        Authorization: authStr
-      },
-      url: 'https://toggl.com/reports/api/v2/details',
-      params: {
-        user_agent: this.state.email,
-        workspace_id: this.state.workspace,
-        user_ids: this.state.user_ids,
-        since: time
-      }
-    })
-    .then((response) => {
-      console.log(response)
-      const timeWorkedBefore = response.data.total_grand
-      this.setState({ timeWorkedBefore })
 
-      const { hours, money, how_long } = this.state
-      if ((hours.length > 0) && (money > 0)) {
-        this.challengeSave({hours, money, how_long, timeWorkedBefore})
-      } else {
-        toastr.error('Please enter correct details')
-      }
-    })
-    .catch((error) => {console.log(error)})
+    if (togglKey && email && workspace && user_ids && hubstaffAuthToken) {
+      const toggl = axios({
+        headers: {
+          Authorization: authStr
+        },
+        url: 'https://toggl.com/reports/api/v2/details',
+        params: {
+          user_agent: email,
+          workspace_id: workspace,
+          user_ids: user_ids,
+          since: time
+        }
+      })
+
+      const hubstaff = axios({
+        url: 'https://api.hubstaff.com/v1/custom/by_date/my',
+        headers: {
+          'Auth-Token': hubstaffAuthToken,
+          'App-Token': hubstaffAppToken
+        },
+        params: {
+          start_date: time,
+          end_date: time
+        }
+      })
+      Promise.all([ toggl, hubstaff ])
+      .then((response) => {
+        const timeWorkedBefore = response[0].data.total_grand
+        const timeWorkedBeforeHub = response[1].data.organizations.reduce((sum, current) => {return (sum + current.duration)}, 0)
+        this.setState({ timeWorkedBefore, timeWorkedBeforeHub })
+
+        const { hours, money, how_long } = this.state
+        if ((hours.length > 0) && (money > 0)) {
+          this.challengeSave({hours, money, how_long, timeWorkedBefore, timeWorkedBeforeHub})
+        } else {
+          toastr.error('Please enter correct details')
+        }
+      })
+      .catch((error) => {console.log(error)})
+    } else if (this.state.hubstaffAuthToken) {
+      axios({
+        url: 'https://api.hubstaff.com/v1/custom/by_date/my',
+        headers: {
+          'Auth-Token': hubstaffAuthToken,
+          'App-Token': hubstaffAppToken
+        },
+        params: {
+          start_date: time,
+          end_date: time
+        }
+      })
+      .then((response) => {
+        const timeWorkedBeforeHub = response.data.organizations.reduce((sum, current) => {return (sum + current.duration)}, 0)
+        this.setState({ timeWorkedBeforeHub })
+
+        const { hours, money, how_long } = this.state
+        if ((hours.length > 0) && (money > 0)) {
+          this.challengeSave({hours, money, how_long, timeWorkedBeforeHub})
+        } else {
+          toastr.error('Please enter correct details')
+        }
+      })
+      .catch((error) => {console.log(error)})
+    } else if (togglKey && email && workspace && user_ids) {
+      axios({
+        headers: {
+          Authorization: authStr
+        },
+        url: 'https://toggl.com/reports/api/v2/details',
+        params: {
+          user_agent: email,
+          workspace_id: workspace,
+          user_ids: user_ids,
+          since: time
+        }
+      })
+      .then((response) => {
+        const timeWorkedBefore = response.data.total_grand
+        this.setState({ timeWorkedBefore })
+
+        const { hours, money, how_long } = this.state
+        if ((hours.length > 0) && (money > 0)) {
+          this.challengeSave({hours, money, how_long, timeWorkedBefore})
+        } else {
+          toastr.error('Please enter correct details')
+        }
+      })
+      .catch((error) => {console.log(error)})
+    }
+
+
   }
 
   challengeSave(params) {
-    const { hours, money, how_long, timeWorkedBefore } = params
+    let { hours, money, how_long, timeWorkedBefore, timeWorkedBeforeHub } = params
     const { uid } = this.props.user
     const key = firebase.database().ref('days').push().key
     const startedAt = Date.now()
+    if (!timeWorkedBeforeHub) {
+      timeWorkedBeforeHub = ''
+    }
+    if (!timeWorkedBefore) {
+      timeWorkedBefore = ''
+    }
     firebase.database().ref('days/' + key).update({
       hours,
       money,
       how_long,
       uid,
       timeWorkedBefore,
+      timeWorkedBeforeHub,
       startedAt,
       isDayOver: false,
       isCharged: false
@@ -145,6 +268,7 @@ class NewActivityList extends Component {
         how_long,
         uid,
         timeWorkedBefore,
+        timeWorkedBeforeHub,
         startedAt,
         isDayOver: false,
         isCharged: false,
@@ -167,6 +291,8 @@ class NewActivityList extends Component {
                 <th>Number of hours:</th>
                 <th>Amount of money:</th>
                 <th>Will be over:</th>
+                <th>Tracked in Toggl:</th>
+                <th>Tracked in hubstaff:</th>
                 <th>How much time you worked:</th>
               </tr>
             </thead>
@@ -177,6 +303,14 @@ class NewActivityList extends Component {
                 <td><CountDown how_long={this.state.how_long} hours={this.state.hours} startedAt={this.state.startedAt}/></td>
                 {this.state.time ? (
                   <td><h5>{(this.state.time - this.state.timeWorkedBefore) / 3600000}</h5></td>
+                ) : (<td><h5></h5></td>)}
+                {this.state.timeHub ? (
+                  <td><h5>{(this.state.timeHub - this.state.timeWorkedBeforeHub) / 3600}</h5></td>
+                ) : (<td><h5></h5></td>)}
+                {(this.state.time && this.state.timeHub) ? (
+                  <td><h5>{(this.state.time - this.state.timeWorkedBefore) / 3600000 + (this.state.timeHub - this.state.timeWorkedBeforeHub) / 3600}</h5></td>
+                ) : (this.state.time) ? (<td><h5>{(this.state.time - this.state.timeWorkedBefore) / 3600000}</h5></td>
+                ) : (this.state.timeHub) ? (<td><h5>{(this.state.timeHub - this.state.timeWorkedBeforeHub) / 3600}</h5></td>
                 ) : (<td><h5></h5></td>)}
               </tr>
             </tbody>

@@ -10,6 +10,7 @@
     "firebase": "^3.6.9",
     "jquery": "^3.1.1",
     "moment": "^2.18.1",
+    "moment-timezone": "^0.5.13",
     "react": "^15.4.2",
     "react-bootstrap": "^0.30.7",
     "react-credit-card": "^0.20.0",

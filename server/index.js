@@ -7,7 +7,9 @@ var stripeToken = 'sk_test_Vv6iDSIXAgbMI6GqUYPISD3a';
 var stripe = require("stripe")(stripeToken);
 var cron = require('node-cron');
 var charge = require('./charge');
-var firebase = require('firebase')
+var firebase = require('firebase');
+var axios = require('axios');
+var moment = require('moment');
 
 var app = express();
 app.use(cors({credentials: true, origin: true}));
@@ -18,7 +20,7 @@ admin.initializeApp({
   databaseURL: "https://top-notch-productivity-f6632.firebaseio.com"
 });
 
-cron.schedule('*/10 * * * * *', function(){
+cron.schedule('*/2 * * * * *', function(){
   charge.charge()
 });
 
