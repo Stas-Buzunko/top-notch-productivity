@@ -141,19 +141,20 @@ class NewActivityList extends Component {
   }
 
   addChallenge = () => {
-    const authStr = 'Basic ' + window.btoa(this.state.togglKey + ':api_token')
+    const { togglKey, email, workspace, user_ids, hubstaffAuthToken, hubstaffAppToken } = this.state
+    const authStr = 'Basic ' + window.btoa(togglKey + ':api_token')
     const time = moment().format('YYYY-MM-DD')
 
-    if (this.state.togglKey && this.state.email && this.state.workspace && this.state.user_ids && this.state.hubstaffAuthToken) {
+    if (togglKey && email && workspace && user_ids && hubstaffAuthToken) {
       const toggl = axios({
         headers: {
           Authorization: authStr
         },
         url: 'https://toggl.com/reports/api/v2/details',
         params: {
-          user_agent: this.state.email,
-          workspace_id: this.state.workspace,
-          user_ids: this.state.user_ids,
+          user_agent: email,
+          workspace_id: workspace,
+          user_ids: user_ids,
           since: time
         }
       })
@@ -161,8 +162,8 @@ class NewActivityList extends Component {
       const hubstaff = axios({
         url: 'https://api.hubstaff.com/v1/custom/by_date/my',
         headers: {
-          'Auth-Token': this.state.hubstaffAuthToken,
-          'App-Token': this.state.hubstaffAppToken
+          'Auth-Token': hubstaffAuthToken,
+          'App-Token': hubstaffAppToken
         },
         params: {
           start_date: time,
@@ -187,8 +188,8 @@ class NewActivityList extends Component {
       axios({
         url: 'https://api.hubstaff.com/v1/custom/by_date/my',
         headers: {
-          'Auth-Token': this.state.hubstaffAuthToken,
-          'App-Token': this.state.hubstaffAppToken
+          'Auth-Token': hubstaffAuthToken,
+          'App-Token': hubstaffAppToken
         },
         params: {
           start_date: time,
@@ -207,16 +208,16 @@ class NewActivityList extends Component {
         }
       })
       .catch((error) => {console.log(error)})
-    } else if (this.state.togglKey && this.state.email && this.state.workspace && this.state.user_ids) {
+    } else if (togglKey && email && workspace && user_ids) {
       axios({
         headers: {
           Authorization: authStr
         },
         url: 'https://toggl.com/reports/api/v2/details',
         params: {
-          user_agent: this.state.email,
-          workspace_id: this.state.workspace,
-          user_ids: this.state.user_ids,
+          user_agent: email,
+          workspace_id: workspace,
+          user_ids: user_ids,
           since: time
         }
       })

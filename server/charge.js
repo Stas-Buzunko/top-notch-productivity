@@ -8,7 +8,6 @@ var stripe = require("stripe")(stripeToken);
 exports.charge = function() {
   admin.database().ref('/days').orderByChild('isDayOver').equalTo(false).once('value').then(function(snapshot) {
     var snap = snapshot.val()
-    console.log(snap)
     var left
     for (key in snap) {
       if (snap[key].how_long == true) {
@@ -19,7 +18,6 @@ exports.charge = function() {
 
       if (Date.now() > left) {
         admin.database().ref('/users/' + snap[key].uid).once('value').then((snapshot) => {
-          console.log('1S')
           const time = moment(snap[key].startedAt).format('YYYY-MM-DD')
           const settingsData = snapshot.val().settings
           const authStr = 'Basic ' + btoa(settingsData.togglKey + ':api_token')
